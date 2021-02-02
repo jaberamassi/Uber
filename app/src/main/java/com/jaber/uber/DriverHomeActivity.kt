@@ -49,7 +49,7 @@ class DriverHomeActivity : AppCompatActivity() {
 
         init()
 
-        
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
