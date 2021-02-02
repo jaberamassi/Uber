@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "473817946156",
+    "project_id": "uber-bce36",
+    "storage_bucket": "uber-bce36.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:473817946156:android:dfaa56e5a8cc961cfa9989",
+        "android_client_info": {
+          "package_name": "com.jaber.uber"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "473817946156-ohusfh7oomrqv2vs96ls9ndilaomhefd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBTqKWHzojkNRbtcdgEDIWPsFueT1UdUyM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "473817946156-ohusfh7oomrqv2vs96ls9ndilaomhefd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
