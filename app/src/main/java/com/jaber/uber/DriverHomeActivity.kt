@@ -48,11 +48,6 @@ class DriverHomeActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
 
         init()
-
-
-
-        //سشيشسيسشيشسي
-
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
