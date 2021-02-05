@@ -16,13 +16,19 @@ import android.widget.Toast
 import com.firebase.ui.auth.AuthMethodPickerLayout
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
+import com.google.firebase.iid.FirebaseInstanceId
+import com.google.firebase.iid.FirebaseInstanceIdReceiver
+import com.google.firebase.installations.FirebaseInstallations
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.FirebaseMessaging
 import com.jaber.uber.model.DriverInfoModel
 import com.jaber.uber.databinding.ActivitySplashScreenBinding
+import com.jaber.uber.utils.UserUtils
 import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import java.util.concurrent.TimeUnit
@@ -88,7 +94,34 @@ class SplashScreenActivity : AppCompatActivity() {
         listener = FirebaseAuth.AuthStateListener { myAuth ->
             val user = myAuth.currentUser
             if (user != null) {
-//                Toast.makeText(this@SplashScreenActivity, "welcome: ${user?.uid}", Toast.LENGTH_LONG).show()
+
+                // Lecture #9
+                //Retrieve the current registration token
+                FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                    if (!task.isSuccessful) {
+                        Log.w("TOKEN", "Fetching FCM registration token failed", task.exception)
+                        return@addOnCompleteListener
+                    }
+
+                    // Get new FCM registration token
+                    val token = task.result
+                    Log.d("TOKEN", token)
+                    UserUtils.updateToken(this@SplashScreenActivity, token)
+                }
+
+//                FirebaseMessaging.getInstance().token
+//                    .addOnFailureListener {e->
+//                        Toast.makeText(this,e.message,Toast.LENGTH_LONG).show()
+//                        return@addOnFailureListener
+//                    }
+//                val token = task.result
+//                    .addOnSuccessListener {id->
+//                        Log.d("Token", id.token)
+//                        UserUtils.updateToken(this@SplashScreenActivity,id.token)
+//                    }
+
+
+
                 Log.i("AuthStateListener" , user.uid)
                 checkUserFromFirebase()
 

@@ -124,8 +124,7 @@ class DriverHomeActivity : AppCompatActivity() {
         val tvStar = headerView.findViewById<TextView>(R.id.tvStar)
         imgAvatar = headerView.findViewById<ImageView>(R.id.ivAvatar)
 
-        tvName.text =
-            "Welcome ${Common.currentDriver!!.firstName} ${Common.currentDriver!!.lastName}"
+        tvName.text = "Welcome ${Common.currentDriver!!.firstName} ${Common.currentDriver!!.lastName}"
         tvPhone.text = Common.currentDriver!!.phoneNumber
         tvStar.text = Common.currentDriver!!.rating.toString()
 
@@ -135,14 +134,12 @@ class DriverHomeActivity : AppCompatActivity() {
                 .load(Common.currentDriver!!.avatar)
                 .into(imgAvatar)
         }
+        //Set an intent to choose image
         imgAvatar.setOnClickListener {
             val intent = Intent()
             intent.setType("image/*")
             intent.setAction(Intent.ACTION_GET_CONTENT)
-            startActivityForResult(
-                Intent.createChooser(intent, "Select Picture"),
-                PICK_IMAGE_REQUEST
-            )
+            startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST)
         }
     }
 
@@ -152,6 +149,7 @@ class DriverHomeActivity : AppCompatActivity() {
             if (requestCode == PICK_IMAGE_REQUEST && data!!.data != null) {
                 imageUri = data.data
                 imgAvatar.setImageURI(imageUri)
+
                 showUploadDialog()
             }
         }
@@ -166,9 +164,14 @@ class DriverHomeActivity : AppCompatActivity() {
             .setPositiveButton("CHANGE") { _, _ ->
                 if (imageUri !=null){
                     waitingDialog.show()
+                    //Create an avatar folder in Storage and subfolder
                     val avatarFolder = storageReference.child("avatars/${currentUserUid}")
 
                     avatarFolder.putFile(imageUri!!)
+                        .addOnProgressListener {taskSnapshot->
+                            val progress = (100.0*taskSnapshot.bytesTransferred / taskSnapshot.totalByteCount)
+                            waitingDialog.setMessage(StringBuilder("uploading: ").append(progress).append("%"))
+                        }
                         .addOnFailureListener {e->
                             Snackbar.make(drawerLayout,e.message.toString(),Snackbar.LENGTH_LONG).show()
                             waitingDialog.dismiss()
@@ -180,14 +183,10 @@ class DriverHomeActivity : AppCompatActivity() {
                                     updateData.put("avatar",uri.toString())
 
                                     UserUtils.updateUser(drawerLayout,updateData)
-
                                 }
                             }
 
                             waitingDialog.dismiss()
-                        }.addOnProgressListener {taskSnapshot->
-                            val progress = (100.0*taskSnapshot.bytesTransferred / taskSnapshot.totalByteCount)
-                            waitingDialog.setMessage(StringBuilder("uploading: ").append(progress).append("%"))
                         }
                 }
             }
