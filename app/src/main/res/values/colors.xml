@@ -8,6 +8,5 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="darker_gray">#777</color>
-    <color name="colorSnackebarError">#F44336</color>
-    <color name="coloSnackbarSuccess">#4CAF50</color>
+
 </resources>

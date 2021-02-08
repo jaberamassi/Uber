@@ -18,6 +18,7 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.bumptech.glide.Glide
 import com.google.android.material.snackbar.Snackbar
@@ -100,7 +101,7 @@ class DriverHomeActivity : AppCompatActivity() {
                     .setPositiveButton("SIGN OUT") { _, _ ->
                         FirebaseAuth.getInstance().signOut()
                         val i = Intent(this, SplashScreenActivity::class.java)
-                        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+                        i.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
                         startActivity(i)
                         finish()
                     }
@@ -108,9 +109,9 @@ class DriverHomeActivity : AppCompatActivity() {
                 val dialog = builder.create()
                 dialog.setOnShowListener {
                     dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                        .setTextColor(resources.getColor(android.R.color.holo_red_dark))
+                        .setTextColor(ContextCompat.getColor(this,android.R.color.holo_red_dark))
                     dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
-                        .setTextColor(resources.getColor(R.color.black))
+                        .setTextColor(ContextCompat.getColor(this,R.color.black))
                 }
                 dialog.show()
             }
@@ -122,14 +123,14 @@ class DriverHomeActivity : AppCompatActivity() {
         val tvName = headerView.findViewById<TextView>(R.id.tvName)
         val tvPhone = headerView.findViewById<TextView>(R.id.tvPhone)
         val tvStar = headerView.findViewById<TextView>(R.id.tvStar)
-        imgAvatar = headerView.findViewById<ImageView>(R.id.ivAvatar)
+        imgAvatar = headerView.findViewById(R.id.ivAvatar)
 
         tvName.text = "Welcome ${Common.currentDriver!!.firstName} ${Common.currentDriver!!.lastName}"
         tvPhone.text = Common.currentDriver!!.phoneNumber
         tvStar.text = Common.currentDriver!!.rating.toString()
 
         // Bring Image if there is an image in storage
-        if (Common.currentDriver != null && Common.currentDriver!!.avatar != null && Common.currentDriver!!.avatar.isNotEmpty()) {
+        if (Common.currentDriver != null && Common.currentDriver!!.avatar.isNotEmpty()) {
             Glide.with(this)
                 .load(Common.currentDriver!!.avatar)
                 .into(imgAvatar)
@@ -137,8 +138,8 @@ class DriverHomeActivity : AppCompatActivity() {
         //Set an intent to choose image
         imgAvatar.setOnClickListener {
             val intent = Intent()
-            intent.setType("image/*")
-            intent.setAction(Intent.ACTION_GET_CONTENT)
+            intent.type = "image/*"
+            intent.action = Intent.ACTION_GET_CONTENT
             startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST)
         }
     }
@@ -165,7 +166,7 @@ class DriverHomeActivity : AppCompatActivity() {
                 if (imageUri !=null){
                     waitingDialog.show()
                     //Create an avatar folder in Storage and subfolder
-                    val avatarFolder = storageReference.child("avatars/${currentUserUid}")
+                    val avatarFolder = storageReference.child("Drivers avatars/${currentUserUid}")
 
                     avatarFolder.putFile(imageUri!!)
                         .addOnProgressListener {taskSnapshot->
@@ -180,7 +181,7 @@ class DriverHomeActivity : AppCompatActivity() {
                             if(uploadTask.isSuccessful){
                                 avatarFolder.downloadUrl.addOnSuccessListener { uri ->
                                     val updateData = HashMap<String,Any>()
-                                    updateData.put("avatar",uri.toString())
+                                    updateData["Drivers avatars"] = uri.toString()
 
                                     UserUtils.updateUser(drawerLayout,updateData)
                                 }
@@ -194,9 +195,9 @@ class DriverHomeActivity : AppCompatActivity() {
         val dialog = builder.create()
         dialog.setOnShowListener {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                .setTextColor(resources.getColor(android.R.color.holo_red_dark))
+                .setTextColor(ContextCompat.getColor(this,android.R.color.holo_red_dark))
             dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
-                .setTextColor(resources.getColor(R.color.black))
+                .setTextColor(ContextCompat.getColor(this,R.color.black))
         }
         dialog.show()
     }

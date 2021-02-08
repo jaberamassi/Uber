@@ -13,25 +13,19 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import com.firebase.ui.auth.AuthMethodPickerLayout
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
-import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
-import com.google.firebase.iid.FirebaseInstanceId
-import com.google.firebase.iid.FirebaseInstanceIdReceiver
-import com.google.firebase.installations.FirebaseInstallations
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
 import com.jaber.uber.model.DriverInfoModel
 import com.jaber.uber.databinding.ActivitySplashScreenBinding
 import com.jaber.uber.utils.UserUtils
-import io.reactivex.Completable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import java.util.concurrent.TimeUnit
 
 
 class SplashScreenActivity : AppCompatActivity() {
@@ -74,11 +68,7 @@ class SplashScreenActivity : AppCompatActivity() {
 
     private fun delaySplashScreen() {
 
-        Handler(Looper.getMainLooper()).postDelayed(object:Runnable {
-            override fun run() {
-                auth.addAuthStateListener(listener)
-            }
-        }, 3000)
+        Handler(Looper.getMainLooper()).postDelayed({ auth.addAuthStateListener(listener) }, 3000)
 
     }
 
@@ -94,9 +84,9 @@ class SplashScreenActivity : AppCompatActivity() {
         listener = FirebaseAuth.AuthStateListener { myAuth ->
             val user = myAuth.currentUser
             if (user != null) {
+                Log.i("AuthStateListener" , user.uid)
 
-                // Lecture #9
-                //Retrieve the current registration token
+                // Lecture #9 Retrieve the current registration token
                 FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
                     if (!task.isSuccessful) {
                         Log.w("TOKEN", "Fetching FCM registration token failed", task.exception)
@@ -109,20 +99,6 @@ class SplashScreenActivity : AppCompatActivity() {
                     UserUtils.updateToken(this@SplashScreenActivity, token)
                 }
 
-//                FirebaseMessaging.getInstance().token
-//                    .addOnFailureListener {e->
-//                        Toast.makeText(this,e.message,Toast.LENGTH_LONG).show()
-//                        return@addOnFailureListener
-//                    }
-//                val token = task.result
-//                    .addOnSuccessListener {id->
-//                        Log.d("Token", id.token)
-//                        UserUtils.updateToken(this@SplashScreenActivity,id.token)
-//                    }
-
-
-
-                Log.i("AuthStateListener" , user.uid)
                 checkUserFromFirebase()
 
             } else {
@@ -151,8 +127,7 @@ class SplashScreenActivity : AppCompatActivity() {
 
                 override fun onCancelled(error: DatabaseError) {
                     Log.w("DatabaseError", "loadPost:onCancelled", error.toException())
-                    Toast.makeText(this@SplashScreenActivity, error.message, Toast.LENGTH_LONG)
-                        .show()
+                    Toast.makeText(this@SplashScreenActivity, error.message, Toast.LENGTH_LONG).show()
                 }
 
             })
@@ -165,12 +140,12 @@ class SplashScreenActivity : AppCompatActivity() {
     }
 
     private fun showRegisterLayout() {
-        val builder = androidx.appcompat.app.AlertDialog.Builder(this, R.style.dialogTheme)
+        val builder = AlertDialog.Builder(this, R.style.dialogTheme)
         val itemView = LayoutInflater.from(this).inflate(R.layout.layout_register, null)
 
-        val et_firstName = itemView.findViewById<EditText>(R.id.etFirstName)
-        val et_lastName = itemView.findViewById<EditText>(R.id.etLastName)
-        val et_phone = itemView.findViewById<EditText>(R.id.etPhone)
+        val etFirstName = itemView.findViewById<EditText>(R.id.etFirstName)
+        val etLastName = itemView.findViewById<EditText>(R.id.etLastName)
+        val etPhone = itemView.findViewById<EditText>(R.id.etPhone)
 
         val btnContinue = itemView.findViewById<Button>(R.id.btnRegister)
 
@@ -178,7 +153,7 @@ class SplashScreenActivity : AppCompatActivity() {
         if (FirebaseAuth.getInstance().currentUser?.phoneNumber != null && !TextUtils.isDigitsOnly(
                 FirebaseAuth.getInstance().currentUser?.phoneNumber)
         ) {
-            et_phone.setText(FirebaseAuth.getInstance().currentUser?.phoneNumber)
+            etPhone.setText(FirebaseAuth.getInstance().currentUser?.phoneNumber)
         }
 
         //Set View
@@ -188,36 +163,41 @@ class SplashScreenActivity : AppCompatActivity() {
 
         //Event
         btnContinue.setOnClickListener {
-            if (et_firstName.text.toString().isEmpty()) {
-                Toast.makeText(this, "Please enter First Name", Toast.LENGTH_LONG).show()
-                return@setOnClickListener
-            } else if (et_lastName.text.toString().isEmpty()) {
-                Toast.makeText(this, "Please enter Last Name", Toast.LENGTH_LONG).show()
-                return@setOnClickListener
-            } else if (et_phone.text.toString().isEmpty()) {
-                Toast.makeText(this, "Please enter Phone Number", Toast.LENGTH_LONG).show()
-                return@setOnClickListener
-            } else {
-                val driver = DriverInfoModel()
+            when {
+                etFirstName.text.toString().isEmpty() -> {
+                    Toast.makeText(this, "Please enter First Name", Toast.LENGTH_LONG).show()
+                    return@setOnClickListener
+                }
+                etLastName.text.toString().isEmpty() -> {
+                    Toast.makeText(this, "Please enter Last Name", Toast.LENGTH_LONG).show()
+                    return@setOnClickListener
+                }
+                etPhone.text.toString().isEmpty() -> {
+                    Toast.makeText(this, "Please enter Phone Number", Toast.LENGTH_LONG).show()
+                    return@setOnClickListener
+                }
+                else -> {
+                    val driver = DriverInfoModel()
 
-                driver.firstName = et_firstName.text.toString()
-                driver.lastName = et_lastName.text.toString()
-                driver.phoneNumber = et_phone.text.toString()
+                    driver.firstName = etFirstName.text.toString()
+                    driver.lastName = etLastName.text.toString()
+                    driver.phoneNumber = etPhone.text.toString()
 
-                //Upload to firebase database
-                driverInfoRef.child(FirebaseAuth.getInstance().currentUser!!.uid)
-                    .setValue(driver)
-                    .addOnFailureListener { exception ->
-                        Toast.makeText(this, exception.message, Toast.LENGTH_LONG).show()
-                        dialog.dismiss()
-                        binding.progressBar.visibility = View.GONE
-                    }.addOnSuccessListener {
-                        Toast.makeText(this, "Register Success", Toast.LENGTH_LONG).show()
-                        dialog.dismiss()
+                    //Upload to firebase database
+                    driverInfoRef.child(FirebaseAuth.getInstance().currentUser!!.uid)
+                        .setValue(driver)
+                        .addOnFailureListener { exception ->
+                            Toast.makeText(this, exception.message, Toast.LENGTH_LONG).show()
+                            dialog.dismiss()
+                            binding.progressBar.visibility = View.GONE
+                        }.addOnSuccessListener {
+                            Toast.makeText(this, "Register Success", Toast.LENGTH_LONG).show()
+                            dialog.dismiss()
 
-                        goToHomeActivity(driver)
-                        binding.progressBar.visibility = View.GONE
-                    }
+                            goToHomeActivity(driver)
+                            binding.progressBar.visibility = View.GONE
+                        }
+                }
             }
         }
     }

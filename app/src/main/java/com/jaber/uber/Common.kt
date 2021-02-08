@@ -18,7 +18,7 @@ object Common {
     var currentDriver: DriverInfoModel? = null
 
     const val TOKEN_REFERENCE: String = "Token"
-    const val DRIVER_INFO_REFERENCE = "driverInfo"
+    const val DRIVER_INFO_REFERENCE = "Drivers"
     const val DRIVERS_LOCATION_REFERENCE: String = "driversLocation"
 
     const val NOTIF_TITLE: String = "title"
@@ -33,7 +33,7 @@ object Common {
     }
 
     fun showNotification(context: Context, id: Int, title: String?, body: String?, intent: Intent?) {
-        var pendingIntent:PendingIntent? = null
+        val pendingIntent:PendingIntent
         if (intent != null){
             pendingIntent = PendingIntent.getActivity(context,id, intent,PendingIntent.FLAG_UPDATE_CURRENT)
             val NOTIFECATION_CHANNEL_ID = "jaber_uber"
